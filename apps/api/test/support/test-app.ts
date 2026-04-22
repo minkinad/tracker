@@ -113,7 +113,9 @@ const PRIORITY_ORDER: Record<TaskPriority, number> = {
 export const testIds = {
   ownerId: "user-owner",
   engineerId: "user-engineer",
+  outsiderId: "user-outsider",
   organizationId: "org-acme",
+  externalOrganizationId: "org-external",
   projectId: "project-core",
 };
 
@@ -146,6 +148,13 @@ class InMemoryTrackerStore {
         passwordHash,
         role: "USER",
       },
+      {
+        id: testIds.outsiderId,
+        email: "outsider@tracker.local",
+        name: "External User",
+        passwordHash,
+        role: "USER",
+      },
     ];
 
     this.organizations = [
@@ -153,6 +162,11 @@ class InMemoryTrackerStore {
         id: testIds.organizationId,
         name: "Acme Platform",
         slug: "acme-platform",
+      },
+      {
+        id: testIds.externalOrganizationId,
+        name: "External Studio",
+        slug: "external-studio",
       },
     ];
 
@@ -168,6 +182,13 @@ class InMemoryTrackerStore {
         id: "membership-engineer",
         organizationId: testIds.organizationId,
         userId: testIds.engineerId,
+        role: "MEMBER",
+        createdAt: now,
+      },
+      {
+        id: "membership-outsider",
+        organizationId: testIds.externalOrganizationId,
+        userId: testIds.outsiderId,
         role: "MEMBER",
         createdAt: now,
       },
@@ -432,6 +453,13 @@ function createTasksRepository(store: InMemoryTrackerStore): TasksRepository {
       }
 
       return Promise.resolve(project);
+    },
+    userCanAccessProject(projectId: string, userId: string) {
+      if (!store.hasProjectAccess(userId, projectId)) {
+        return Promise.resolve(null);
+      }
+
+      return Promise.resolve({ id: projectId });
     },
     async create(projectId: string, actorId: string, data: CreateTaskDto) {
       const now = new Date();

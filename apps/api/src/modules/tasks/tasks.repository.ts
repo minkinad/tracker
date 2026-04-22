@@ -89,6 +89,22 @@ export class TasksRepository {
     });
   }
 
+  userCanAccessProject(projectId: string, userId: string) {
+    return this.prisma.project.findFirst({
+      where: {
+        id: projectId,
+        organization: {
+          memberships: {
+            some: { userId },
+          },
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+  }
+
   create(projectId: string, actorId: string, data: { title: string; description?: string; status?: string; priority?: string; assigneeId?: string | null }) {
     return this.prisma.task.create({
       data: {
