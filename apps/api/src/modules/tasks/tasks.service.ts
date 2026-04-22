@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import type { CreateTaskDto, TaskActivityDto, TaskDetailsDto, TaskFiltersDto, TaskListResponseDto, UpdateTaskDto } from "@tracker/types";
 import { RedisService } from "../../common/redis/redis.service";
 import { ActivityRepository } from "./activity.repository";
@@ -47,6 +47,8 @@ export class TasksService {
       throw new ForbiddenException("Access denied to project");
     }
 
+    await this.ensureAssigneeCanAccessProject(projectId, dto.assigneeId);
+
     const task = await this.tasksRepository.create(projectId, userId, dto);
 
     await this.taskEventsService.publish({
@@ -75,6 +77,10 @@ export class TasksService {
 
     if (!existing) {
       throw new NotFoundException("Task not found");
+    }
+
+    if (dto.assigneeId !== undefined) {
+      await this.ensureAssigneeCanAccessProject(existing.projectId, dto.assigneeId);
     }
 
     const updated = await this.tasksRepository.update(taskId, dto);
@@ -141,5 +147,17 @@ export class TasksService {
         beforeValue: existing[field] ? String(existing[field]) : null,
         afterValue: dto[field] ? String(dto[field]) : null,
       }));
+  }
+
+  private async ensureAssigneeCanAccessProject(projectId: string, assigneeId?: string | null) {
+    if (!assigneeId) {
+      return;
+    }
+
+    const project = await this.tasksRepository.userCanAccessProject(projectId, assigneeId);
+
+    if (!project) {
+      throw new BadRequestException("Assignee must belong to the project organization");
+    }
   }
 }

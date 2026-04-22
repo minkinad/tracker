@@ -98,4 +98,58 @@ describe("task flow", () => {
       ),
     );
   });
+
+  it("rejects assignees outside the project organization", async () => {
+    const context = await createTestApp();
+    appsToClose.add(context);
+
+    const request = supertest(context.app.getHttpServer());
+
+    const loginResponse = await request.post("/api/auth/login").send({
+      email: "owner@tracker.local",
+      password: "changeme123",
+    });
+
+    const accessToken = loginResponse.body.tokens.accessToken as string;
+
+    const rejectedCreateResponse = await request
+      .post(`/api/projects/${testIds.projectId}/tasks`)
+      .set("Authorization", `Bearer ${accessToken}`)
+      .send({
+        title: "Reject invalid assignee",
+        assigneeId: testIds.outsiderId,
+      });
+
+    assert.equal(rejectedCreateResponse.status, 400);
+    assert.match(rejectedCreateResponse.body.message, /Assignee/);
+
+    const createResponse = await request
+      .post(`/api/projects/${testIds.projectId}/tasks`)
+      .set("Authorization", `Bearer ${accessToken}`)
+      .send({
+        title: "Keep valid assignee",
+        assigneeId: testIds.engineerId,
+      });
+
+    assert.equal(createResponse.status, 201);
+
+    const taskId = createResponse.body.id as string;
+
+    const rejectedUpdateResponse = await request
+      .patch(`/api/tasks/${taskId}`)
+      .set("Authorization", `Bearer ${accessToken}`)
+      .send({
+        assigneeId: testIds.outsiderId,
+      });
+
+    assert.equal(rejectedUpdateResponse.status, 400);
+    assert.match(rejectedUpdateResponse.body.message, /Assignee/);
+
+    const detailsResponse = await request
+      .get(`/api/tasks/${taskId}`)
+      .set("Authorization", `Bearer ${accessToken}`);
+
+    assert.equal(detailsResponse.status, 200);
+    assert.equal(detailsResponse.body.assignee.id, testIds.engineerId);
+  });
 });
