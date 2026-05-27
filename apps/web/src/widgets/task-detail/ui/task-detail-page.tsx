@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { Route } from "next";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { TaskDto, TaskPriority, TaskStatus, UserSummaryDto } from "@tracker/types";
 import { Badge, Button, Card, Input, Select, Textarea } from "@tracker/ui";
@@ -12,6 +12,7 @@ import { queryKeys } from "@/lib/query-keys";
 import { priorityLabels, priorityTone, statusAccentClass, statusLabels, statusTone } from "@/lib/task-meta";
 import { formatDate, formatDateTime, formatRelativeDate } from "@/shared/lib/utils/date";
 import { ActivityIcon, CheckCircleIcon, CommentIcon, LinkIcon, UserIcon } from "@/shared/ui/tracker-icons";
+import { getInitials } from "@/shared/lib/utils/string";
 import { WorkspacePage, type WorkspaceData } from "@/widgets/workspace-shell/ui/workspace-shell";
 
 type TaskTab = "comments" | "activity" | "related";
@@ -30,18 +31,6 @@ const fieldLabels: Record<string, string> = {
   assigneeId: "исполнитель",
 };
 
-function getInitials(value: string): string {
-  return (
-    value
-      .split(/\s+/)
-      .filter(Boolean)
-      .map((part) => part[0])
-      .join("")
-      .slice(0, 2)
-      .toUpperCase() || "UN"
-  );
-}
-
 function taskKey(taskId: string): string {
   return taskId.slice(-8).toUpperCase();
 }
@@ -55,7 +44,7 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function RelatedTaskLink({ task }: { task: TaskDto }) {
+const RelatedTaskLink = memo(function RelatedTaskLink({ task }: { task: TaskDto }) {
   return (
     <Link
       href={`/tasks/${task.id}` as Route}
@@ -66,7 +55,7 @@ function RelatedTaskLink({ task }: { task: TaskDto }) {
       <Badge tone={statusTone[task.status]}>{statusLabels[task.status]}</Badge>
     </Link>
   );
-}
+});
 
 function formatActivityLabel(action: string, field: string | null) {
   const base = activityLabels[action] ?? action;

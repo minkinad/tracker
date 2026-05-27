@@ -32,21 +32,10 @@ import type { WorkspaceData } from "@/widgets/workspace-shell/model/types";
 import { EmptyState } from "@/widgets/workspace-shell/ui/empty-state";
 import { useUiStore } from "@/store/use-ui-store";
 import { statusLabels, statusOrder, statusTone } from "@/lib/task-meta";
+import { getInitials } from "@/shared/lib/utils/string";
 
 export type { TaskScope, WorkspaceData } from "@/widgets/workspace-shell/model/types";
 export { filterTasksByScope } from "@/widgets/workspace-shell/lib/task-utils";
-
-function getInitials(value: string): string {
-  const initials = value
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-
-  return initials || "TR";
-}
 
 type SidebarPanel = "tasks" | "projects" | "goals" | "queues" | "boards" | "dashboards" | "history" | "settings";
 

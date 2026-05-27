@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import {
   DndContext,
   PointerSensor,
@@ -20,20 +21,11 @@ import { apiClient } from "@/lib/api-client";
 import { queryKeys } from "@/lib/query-keys";
 import { priorityLabels, priorityTone, statusLabels, statusOrder, statusTone } from "@/lib/task-meta";
 import { formatRelativeDate } from "@/shared/lib/utils/date";
+import { getInitials } from "@/shared/lib/utils/string";
 import { CommentIcon, UserIcon } from "@/shared/ui/tracker-icons";
 import { useUiStore } from "@/store/use-ui-store";
 
-function getInitials(value: string): string {
-  return value
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase() || "UN";
-}
-
-function TaskCard({ task, onOpen }: { task: TaskDto; onOpen: (taskId: string) => void }) {
+const TaskCard = memo(function TaskCard({ task, onOpen }: { task: TaskDto; onOpen: (taskId: string) => void }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: task.id,
     data: { status: task.status },
@@ -97,7 +89,7 @@ function TaskCard({ task, onOpen }: { task: TaskDto; onOpen: (taskId: string) =>
       </button>
     </motion.article>
   );
-}
+});
 
 function BoardColumn({
   status,
