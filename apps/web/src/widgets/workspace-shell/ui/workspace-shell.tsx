@@ -15,6 +15,8 @@ import { formatRelativeDate } from "@/shared/lib/utils/date";
 import {
   ActivityIcon,
   BoardIcon,
+  CalendarIcon,
+  CheckCircleIcon,
   GoalIcon,
   HistoryIcon,
   ListIcon,
@@ -22,11 +24,13 @@ import {
   ProjectsIcon,
   QueueIcon,
   SettingsIcon,
+  SparkIcon,
   UserIcon,
 } from "@/shared/ui/tracker-icons";
 import { apiClient } from "@/lib/api-client";
 import { queryKeys } from "@/lib/query-keys";
 import { countByStatus, getCompletion, taskKey } from "@/widgets/workspace-shell/lib/task-utils";
+import { getAttentionCounts, getDeliveryStats, getProjectPulse } from "@/widgets/workspace-shell/lib/workspace-insights";
 import { useWorkspaceData } from "@/widgets/workspace-shell/model/use-workspace-data";
 import type { WorkspaceData } from "@/widgets/workspace-shell/model/types";
 import { EmptyState } from "@/widgets/workspace-shell/ui/empty-state";
@@ -567,22 +571,108 @@ function WorkspaceHeader({
   description: string;
   data: WorkspaceData;
 }) {
+  const attention = getAttentionCounts(data.tasks);
+  const delivery = getDeliveryStats(data.tasks);
+  const pulse = getProjectPulse(data.tasks);
+  const highlights = [
+    {
+      label: "Готовность",
+      value: `${getCompletion(data.tasks)}%`,
+      hint: "Закрытые задачи в рамках текущего проекта.",
+      icon: CheckCircleIcon,
+    },
+    {
+      label: "На ревью",
+      value: attention.review,
+      hint: "Очередь на приёмку и финальную проверку.",
+      icon: SparkIcon,
+    },
+    {
+      label: "Без исполнителя",
+      value: attention.unassigned,
+      hint: "Задачи, которые ещё не закреплены за владельцем.",
+      icon: UserIcon,
+    },
+    {
+      label: "Delivery 7d",
+      value: `${delivery.closed}/${delivery.created}`,
+      hint: "Закрыто / создано за последние 7 дней.",
+      icon: CalendarIcon,
+    },
+  ];
+
   return (
-    <header className="rounded-[30px] border border-black/[0.08] bg-white/78 px-5 py-6 shadow-[0_18px_40px_rgba(15,23,42,0.05)] backdrop-blur-sm md:px-7">
-      <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-text/36">{data.activeProject?.key ?? "WORKSPACE"}</p>
-          <h1 className="mt-3 text-4xl font-semibold tracking-[-0.055em] text-text md:text-6xl">{title}</h1>
-          <p className="mt-3 max-w-2xl text-base leading-7 text-text/60">{description}</p>
+    <header className="overflow-hidden rounded-[34px] border border-black/[0.08] bg-white/78 shadow-[0_22px_48px_rgba(15,23,42,0.06)] backdrop-blur-sm">
+      <div className="border-b border-black/[0.08] bg-[linear-gradient(135deg,rgba(17,24,39,0.04),rgba(63,124,244,0.06))] px-5 py-5 md:px-7">
+        <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
+          <div>
+            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-text/40">
+              <span>{data.activeProject?.key ?? "WORKSPACE"}</span>
+              <span className="rounded-full bg-black/[0.06] px-2.5 py-1 text-[11px] tracking-[0.14em] text-text/56">
+                {data.organizations.find((organization) => organization.id === data.activeOrganizationId)?.name ?? "Organization"}
+              </span>
+              <span className="rounded-full bg-black/[0.06] px-2.5 py-1 text-[11px] tracking-[0.14em] text-text/56">{pulse.label}</span>
+            </div>
+            <h1 className="mt-4 text-4xl font-semibold tracking-[-0.055em] text-text md:text-6xl">{title}</h1>
+            <p className="mt-3 max-w-3xl text-base leading-7 text-text/60">{description}</p>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 xl:min-w-[390px]">
+            <div className="rounded-[24px] bg-[#111827] p-4 text-white shadow-[0_18px_38px_rgba(15,23,42,0.16)]">
+              <p className="text-xs uppercase tracking-[0.16em] text-white/48">Пульс проекта</p>
+              <p className="mt-3 text-3xl font-semibold tracking-[-0.05em]">{pulse.score}</p>
+              <p className="mt-2 text-sm leading-6 text-white/72">{pulse.summary}</p>
+            </div>
+            <div className="rounded-[24px] border border-black/[0.08] bg-white/86 p-4">
+              <p className="text-xs uppercase tracking-[0.16em] text-text/38">Команда и поток</p>
+              <div className="mt-4 grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-text/36">Участники</p>
+                  <p className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-text">{data.members.length}</p>
+                </div>
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-text/36">Открытые</p>
+                  <p className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-text">{data.tasks.length - countByStatus(data.tasks, "DONE")}</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="min-w-[240px] rounded-[24px] border border-black/[0.08] bg-[#eef1f3] p-4">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-text/48">{data.activeProject?.name ?? "Проект не выбран"}</span>
-            <span className="font-semibold text-text">{getCompletion(data.tasks)}%</span>
-          </div>
-          <div className="mt-3 h-2 overflow-hidden rounded-full bg-black/[0.08]">
-            <div className="h-full rounded-full bg-[#3f7cf4]" style={{ width: `${getCompletion(data.tasks)}%` }} />
-          </div>
+      </div>
+
+      <div className="grid gap-3 px-5 py-5 md:grid-cols-2 md:px-7 xl:grid-cols-4">
+        {highlights.map((item) => {
+          const Icon = item.icon;
+
+          return (
+            <article key={item.label} className="rounded-[24px] border border-black/[0.08] bg-white/72 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-xs uppercase tracking-[0.16em] text-text/38">{item.label}</p>
+                <div className="grid h-9 w-9 place-items-center rounded-2xl bg-[#eef2f6] text-[#111827]">
+                  <Icon size={18} />
+                </div>
+              </div>
+              <p className="mt-4 text-3xl font-semibold tracking-[-0.05em] text-text">{item.value}</p>
+              <p className="mt-2 text-sm leading-6 text-text/54">{item.hint}</p>
+            </article>
+          );
+        })}
+      </div>
+
+      <div className="grid gap-3 border-t border-black/[0.08] px-5 py-4 text-sm text-text/56 md:grid-cols-3 md:px-7">
+        <div className="rounded-[22px] bg-[#f4f6f8] px-4 py-3">
+          <p className="font-semibold text-text">{data.activeProject?.name ?? "Проект не выбран"}</p>
+          <p className="mt-1">Текущий контекст для всех фильтров, досок и аналитики.</p>
+        </div>
+        <div className="rounded-[22px] bg-[#f4f6f8] px-4 py-3">
+          <p className="font-semibold text-text">Роль в пространстве</p>
+          <p className="mt-1">{data.organizationRole ?? data.userRole}</p>
+        </div>
+        <div className="rounded-[22px] bg-[#f4f6f8] px-4 py-3">
+          <p className="font-semibold text-text">Темп команды</p>
+          <p className="mt-1">
+            {delivery.closed >= delivery.created ? "Закрываем быстрее, чем создаём." : "Бэклог растёт быстрее delivery, нужен контроль входящего потока."}
+          </p>
         </div>
       </div>
     </header>
@@ -627,7 +717,7 @@ export function WorkspacePage({
     <main className="min-h-screen bg-[#eef1f3] text-text">
       <div className="flex min-h-screen flex-col lg:flex-row">
         <WorkspaceSidebar data={data} />
-        <section className="min-w-0 flex-1 px-4 py-5 md:px-8 lg:px-10">
+        <section className="min-w-0 flex-1 px-4 py-5 md:px-7 lg:px-9">
           <div className="mx-auto max-w-[1480px] space-y-8">
             <WorkspaceHeader title={title} description={description} data={data} />
             {data.projects.length === 0 ? (
