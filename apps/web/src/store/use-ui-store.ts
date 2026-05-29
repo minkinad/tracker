@@ -4,6 +4,16 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { AuthUserDto, TaskPriority, TaskStatus } from "@tracker/types";
 
+export interface SavedTaskView {
+  id: string;
+  name: string;
+  search: string;
+  status: TaskStatus | "ALL";
+  priority: TaskPriority | "ALL";
+  assigneeId: string | "ALL";
+  createdAt: string;
+}
+
 interface UiState {
   hydrated: boolean;
   accessToken: string | null;
@@ -15,6 +25,7 @@ interface UiState {
   status: TaskStatus | "ALL";
   priority: TaskPriority | "ALL";
   assigneeId: string | "ALL";
+  savedTaskViews: SavedTaskView[];
   setHydrated: (value: boolean) => void;
   setSession: (input: { accessToken: string; refreshToken: string; user: AuthUserDto }) => void;
   updateTokens: (input: { accessToken: string; refreshToken: string }) => void;
@@ -25,6 +36,9 @@ interface UiState {
   setStatus: (value: TaskStatus | "ALL") => void;
   setPriority: (value: TaskPriority | "ALL") => void;
   setAssigneeId: (value: string | "ALL") => void;
+  saveCurrentTaskView: (name: string) => void;
+  applyTaskView: (view: Pick<SavedTaskView, "search" | "status" | "priority" | "assigneeId">) => void;
+  deleteTaskView: (id: string) => void;
 }
 
 export const useUiStore = create<UiState>()(
@@ -40,6 +54,7 @@ export const useUiStore = create<UiState>()(
       status: "ALL",
       priority: "ALL",
       assigneeId: "ALL",
+      savedTaskViews: [],
       setHydrated: (hydrated) => set({ hydrated }),
       setSession: ({ accessToken, refreshToken, user }) =>
         set({
@@ -70,6 +85,32 @@ export const useUiStore = create<UiState>()(
       setStatus: (status) => set({ status }),
       setPriority: (priority) => set({ priority }),
       setAssigneeId: (assigneeId) => set({ assigneeId }),
+      saveCurrentTaskView: (name) =>
+        set((state) => ({
+          savedTaskViews: [
+            {
+              id: `view-${Math.random().toString(36).slice(2, 10)}`,
+              name: name.trim(),
+              search: state.search,
+              status: state.status,
+              priority: state.priority,
+              assigneeId: state.assigneeId,
+              createdAt: new Date().toISOString(),
+            },
+            ...state.savedTaskViews,
+          ],
+        })),
+      applyTaskView: (view) =>
+        set({
+          search: view.search,
+          status: view.status,
+          priority: view.priority,
+          assigneeId: view.assigneeId,
+        }),
+      deleteTaskView: (id) =>
+        set((state) => ({
+          savedTaskViews: state.savedTaskViews.filter((view) => view.id !== id),
+        })),
     }),
     {
       name: "tracker-web-ui",
@@ -83,6 +124,7 @@ export const useUiStore = create<UiState>()(
         status: state.status,
         priority: state.priority,
         assigneeId: state.assigneeId,
+        savedTaskViews: state.savedTaskViews,
       }),
       onRehydrateStorage: () => (state) => {
         state?.setHydrated(true);
