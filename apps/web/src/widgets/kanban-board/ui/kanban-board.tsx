@@ -39,8 +39,8 @@ const TaskCard = memo(function TaskCard({ task, onOpen }: { task: TaskDto; onOpe
       animate={{ opacity: isDragging ? 0.58 : 1, scale: isDragging ? 1.015 : 1 }}
       transition={{ duration: 0.16 }}
       className={clsx(
-        "group border-b border-black/[0.08] py-4 text-left transition",
-        isDragging ? "z-20 cursor-grabbing bg-white/70 ring-2 ring-accent/30" : "hover:bg-black/[0.025]",
+        "group rounded-[24px] border border-black/[0.08] bg-white/86 p-4 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition",
+        isDragging ? "z-20 cursor-grabbing bg-white/70 ring-2 ring-accent/30" : "hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_14px_28px_rgba(15,23,42,0.08)]",
       )}
     >
       <button
@@ -112,7 +112,7 @@ function BoardColumn({
         isOver ? "bg-[#eef4ff] ring-2 ring-[#3f7cf4]/20" : "bg-white/82",
       )}
     >
-      <header className="mb-4 flex items-start justify-between gap-3">
+      <header className="mb-4 flex items-start justify-between gap-3 border-b border-black/[0.08] pb-4">
         <div>
           <Badge tone={statusTone[status]}>{statusLabels[status]}</Badge>
           <p className="mt-3 text-sm leading-6 text-text/52">
