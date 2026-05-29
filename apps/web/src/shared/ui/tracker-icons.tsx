@@ -3,7 +3,7 @@
 import type { SVGProps } from "react";
 import clsx from "clsx";
 
-type IconProps = SVGProps<SVGSVGElement> & {
+export type IconProps = SVGProps<SVGSVGElement> & {
   size?: number;
   strokeWidth?: number;
 };

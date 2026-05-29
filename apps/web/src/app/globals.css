@@ -5,13 +5,13 @@
 @tailwind utilities;
 
 :root {
-  --surface: #e9eef2;
+  --surface: #edf1f5;
   --card: #ffffff;
-  --border: #d8dee6;
-  --muted: #f4f6f8;
+  --border: #d5dde7;
+  --muted: #f4f7fa;
   --text: #111827;
-  --accent: #f97316;
-  --accent-soft: rgba(249, 115, 22, 0.14);
+  --accent: #3156d3;
+  --accent-soft: rgba(49, 86, 211, 0.14);
   --success: #0f766e;
   --warning: #c27a1a;
   --danger: #c2414b;
@@ -45,9 +45,9 @@ body {
   min-height: 100vh;
   color: var(--text);
   background:
-    radial-gradient(circle at 14% 12%, rgba(249, 115, 22, 0.12), transparent 24%),
-    radial-gradient(circle at 86% 8%, rgba(63, 124, 244, 0.08), transparent 20%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(233, 238, 242, 0.46)),
+    radial-gradient(circle at 12% 14%, rgba(49, 86, 211, 0.11), transparent 22%),
+    radial-gradient(circle at 84% 10%, rgba(17, 24, 39, 0.06), transparent 18%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(237, 241, 245, 0.62)),
     var(--surface);
   font-family: "Manrope", "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -62,9 +62,9 @@ body::before {
   pointer-events: none;
   content: "";
   background-image:
-    linear-gradient(rgba(17, 24, 39, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(17, 24, 39, 0.03) 1px, transparent 1px);
-  background-size: 56px 56px;
+    linear-gradient(rgba(17, 24, 39, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17, 24, 39, 0.025) 1px, transparent 1px);
+  background-size: 44px 44px;
   mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.62), transparent 82%);
 }
 
