@@ -1,4 +1,4 @@
-import { Injectable, OnModuleDestroy } from "@nestjs/common";
+import { Inject, Injectable, OnModuleDestroy, Optional } from "@nestjs/common";
 import Redis from "ioredis";
 
 interface RedisClientLike {
@@ -14,7 +14,7 @@ interface RedisClientLike {
 export class RedisService implements OnModuleDestroy {
   private readonly client: RedisClientLike;
 
-  constructor(client?: RedisClientLike) {
+  constructor(@Optional() @Inject("REDIS_CLIENT") client?: RedisClientLike) {
     this.client =
       client ??
       new Redis(process.env.REDIS_URL ?? "redis://localhost:6379", {
