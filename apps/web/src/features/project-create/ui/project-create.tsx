@@ -10,7 +10,7 @@ export function ProjectCreate({ organizationId }: { organizationId: string }) {
   const [keyValue, setKeyValue] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
@@ -31,16 +31,16 @@ export function ProjectCreate({ organizationId }: { organizationId: string }) {
   });
 
   return (
-    <div className="rounded-[28px] border border-black/[0.08] bg-[#eef1f3] p-4 text-text">
+    <div className="rounded-xl border border-black/[0.08] bg-[#eef1f3] p-4 text-text">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-text/36">Новый проект</p>
+          <p className="text-xs uppercase text-text/36">Новый проект</p>
           <p className="mt-1 text-sm font-medium text-text/82">Добавить рабочую область</p>
         </div>
         <Button
           type="button"
           variant="ghost"
-          className="rounded-[18px]"
+          className="rounded-lg"
           onClick={() => setExpanded((value) => !value)}
         >
           {expanded ? "Скрыть" : "Открыть"}
@@ -71,7 +71,7 @@ export function ProjectCreate({ organizationId }: { organizationId: string }) {
           <Button
             type="button"
             variant="primary"
-            className="rounded-2xl"
+            className="rounded-lg"
             disabled={mutation.isPending || !keyValue.trim() || !name.trim()}
             onClick={() => {
               mutation.mutate();
@@ -80,12 +80,10 @@ export function ProjectCreate({ organizationId }: { organizationId: string }) {
             {mutation.isPending ? "Создаю..." : "Создать проект"}
           </Button>
         </div>
-      ) : (
-        <p className="mt-3 text-sm text-text/44">Форма скрыта, чтобы не перегружать боковую панель.</p>
-      )}
+      ) : null}
 
       {mutation.error ? (
-        <p className="mt-3 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">Не удалось создать проект. Проверь уникальность ключа.</p>
+        <p className="mt-3 rounded-lg bg-rose-50 px-4 py-3 text-sm text-rose-700">Не удалось создать проект. Проверь уникальность ключа.</p>
       ) : null}
     </div>
   );

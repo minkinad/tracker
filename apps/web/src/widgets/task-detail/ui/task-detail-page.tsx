@@ -50,7 +50,7 @@ const RelatedTaskLink = memo(function RelatedTaskLink({ task }: { task: TaskDto 
       href={`/tasks/${task.id}` as Route}
       className="grid w-full gap-3 border-b border-black/[0.08] py-4 text-left transition hover:bg-black/[0.025] md:grid-cols-[120px_minmax(0,1fr)_120px]"
     >
-      <span className="font-mono text-xs font-bold uppercase tracking-[0.16em] text-text/40">{taskKey(task.id)}</span>
+      <span className="font-mono text-xs font-bold uppercase text-text/40">{taskKey(task.id)}</span>
       <span className="line-clamp-1 font-semibold text-text">{task.title}</span>
       <Badge tone={statusTone[task.status]}>{statusLabels[task.status]}</Badge>
     </Link>
@@ -98,14 +98,17 @@ function TaskDetailContent({ taskId, data }: { taskId: string; data: WorkspaceDa
   }, [taskQuery.data]);
 
   const updateMutation = useMutation({
-    mutationFn: () =>
-      apiClient.updateTask(taskId, {
-        title: title.trim(),
-        description: description.trim() || null,
-        status,
-        priority,
-        assigneeId: assigneeId || null,
-      }),
+    mutationFn: (input?: Record<string, unknown>) =>
+      apiClient.updateTask(
+        taskId,
+        input ?? {
+          title: title.trim(),
+          description: description.trim() || null,
+          status,
+          priority,
+          assigneeId: assigneeId || null,
+        },
+      ),
     onSuccess: async (task) => {
       await queryClient.invalidateQueries({ queryKey: ["tasks", task.projectId] });
       await queryClient.invalidateQueries({ queryKey: queryKeys.task(task.id) });
@@ -131,7 +134,7 @@ function TaskDetailContent({ taskId, data }: { taskId: string; data: WorkspaceDa
         <p className="mt-2 text-sm text-text/52">Проверьте доступ к проекту или вернитесь к списку задач.</p>
         <Link
           href="/tasks"
-          className="mt-5 inline-flex items-center justify-center rounded-2xl bg-[#111827] px-5 py-3 text-sm font-medium text-white transition hover:bg-[#020617]"
+          className="mt-5 inline-flex items-center justify-center rounded-lg bg-[#111827] px-5 py-3 text-sm font-medium text-white transition hover:bg-[#020617]"
         >
           К списку задач
         </Link>
@@ -170,6 +173,22 @@ function TaskDetailContent({ taskId, data }: { taskId: string; data: WorkspaceDa
     { id: "activity", label: "История", count: task.activity.length },
     { id: "related", label: "Связанные", count: relatedTasks.length },
   ];
+  const nextWorkflowAction =
+    task.status === "TODO"
+      ? { label: "Взять в работу", status: "IN_PROGRESS" as const }
+      : task.status === "IN_PROGRESS"
+        ? { label: "Отправить на ревью", status: "REVIEW" as const }
+        : task.status === "REVIEW"
+          ? { label: "Закрыть задачу", status: "DONE" as const }
+          : { label: "Переоткрыть", status: "TODO" as const };
+  const me = users.find((user) => user.id === data.userId);
+  const resetForm = () => {
+    setTitle(task.title);
+    setDescription(task.description ?? "");
+    setStatus(task.status);
+    setPriority(task.priority);
+    setAssigneeId(task.assignee?.id ?? "");
+  };
 
   return (
     <div className="grid gap-10 2xl:grid-cols-[minmax(0,1fr)_340px]">
@@ -179,18 +198,27 @@ function TaskDetailContent({ taskId, data }: { taskId: string; data: WorkspaceDa
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full bg-[#111827] px-3 py-1.5 font-mono text-xs font-bold tracking-[0.16em] text-white">
+                  <span className="rounded-full bg-[#111827] px-3 py-1.5 font-mono text-xs font-bold text-white">
                     {activeProject?.key ?? "TASK"}-{taskKey(task.id)}
                   </span>
                   <Badge tone={statusTone[task.status]}>{statusLabels[task.status]}</Badge>
                   <Badge tone={priorityTone[task.priority]}>{priorityLabels[task.priority]}</Badge>
                 </div>
-                <h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em] text-text md:text-5xl">{task.title}</h2>
+                <h2 className="mt-4 text-3xl font-semibold tracking-normal text-text md:text-5xl">{task.title}</h2>
                 <p className="mt-3 max-w-3xl text-sm leading-6 text-text/56">
                   Создано {formatDateTime(task.createdAt)} · обновлено {formatRelativeDate(task.updatedAt)}
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant={nextWorkflowAction.status === "DONE" ? "primary" : "secondary"}
+                  disabled={updateMutation.isPending}
+                  onClick={() => updateMutation.mutate({ status: nextWorkflowAction.status })}
+                >
+                  <CheckCircleIcon className="mr-2" size={16} />
+                  {nextWorkflowAction.label}
+                </Button>
                 <Button type="button" variant="ghost" className="rounded-xl px-4" onClick={() => navigator.clipboard?.writeText(task.id)}>
                   <LinkIcon className="mr-2" size={18} />
                   ID
@@ -262,12 +290,22 @@ function TaskDetailContent({ taskId, data }: { taskId: string; data: WorkspaceDa
                     {statusLabels[status]}
                   </span>
                   <span className="text-sm text-text/48">{dirty ? "Есть несохранённые изменения" : "Все изменения сохранены"}</span>
+                  {dirty ? (
+                    <Button type="button" variant="ghost" disabled={updateMutation.isPending} onClick={resetForm}>
+                      Отменить
+                    </Button>
+                  ) : null}
+                  {me && assigneeId !== me.id ? (
+                    <Button type="button" variant="secondary" disabled={updateMutation.isPending} onClick={() => setAssigneeId(me.id)}>
+                      Назначить мне
+                    </Button>
+                  ) : null}
                   <Button
                     type="button"
                     variant="primary"
                     className="ml-auto rounded-xl bg-[#111827] px-5 py-3 hover:bg-[#020617]"
                     disabled={!dirty || title.trim().length < 3 || updateMutation.isPending}
-                    onClick={() => updateMutation.mutate()}
+                    onClick={() => updateMutation.mutate(undefined)}
                   >
                     {updateMutation.isPending ? "Сохраняю..." : "Сохранить"}
                   </Button>
@@ -316,7 +354,7 @@ function TaskDetailContent({ taskId, data }: { taskId: string; data: WorkspaceDa
                     </div>
 
                     {task.comments.length === 0 ? (
-                      <div className="rounded-2xl border border-dashed border-black/[0.08] px-4 py-8 text-center text-sm text-text/50">
+                      <div className="rounded-lg border border-dashed border-black/[0.08] px-4 py-8 text-center text-sm text-text/50">
                         Комментариев пока нет. Зафиксируйте первый контекст.
                       </div>
                     ) : (
@@ -341,7 +379,7 @@ function TaskDetailContent({ taskId, data }: { taskId: string; data: WorkspaceDa
                 {tab === "activity" ? (
                   <div className="space-y-3 py-5">
                     {task.activity.length === 0 ? (
-                      <div className="rounded-2xl border border-dashed border-black/[0.08] px-4 py-8 text-center text-sm text-text/50">
+                      <div className="rounded-lg border border-dashed border-black/[0.08] px-4 py-8 text-center text-sm text-text/50">
                         История появится после изменений задачи.
                       </div>
                     ) : (
@@ -369,7 +407,7 @@ function TaskDetailContent({ taskId, data }: { taskId: string; data: WorkspaceDa
                 {tab === "related" ? (
                   <div className="space-y-3 py-5">
                     {relatedTasks.length === 0 ? (
-                      <div className="rounded-2xl border border-dashed border-black/[0.08] px-4 py-8 text-center text-sm text-text/50">
+                      <div className="rounded-lg border border-dashed border-black/[0.08] px-4 py-8 text-center text-sm text-text/50">
                         Связанные задачи появятся по статусу, автору или исполнителю.
                       </div>
                     ) : (
@@ -402,6 +440,15 @@ function TaskDetailContent({ taskId, data }: { taskId: string; data: WorkspaceDa
                 <div className="mt-5 rounded-xl bg-white/10 p-4">
                   <p className="text-sm text-white/48">Состояние</p>
                   <p className="mt-1 text-2xl font-semibold">{statusLabels[task.status]}</p>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="mt-4 w-full border-white/15 bg-white/10 text-white hover:bg-white/15"
+                    disabled={updateMutation.isPending}
+                    onClick={() => updateMutation.mutate({ status: nextWorkflowAction.status })}
+                  >
+                    {nextWorkflowAction.label}
+                  </Button>
                 </div>
               </Card>
             </aside>
