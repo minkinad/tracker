@@ -21,10 +21,10 @@ import { EmptyState } from "@/widgets/workspace-shell/ui/empty-state";
 
 function Metric({ label, value, hint }: { label: string; value: string | number; hint: string }) {
   return (
-    <div className="rounded-[24px] border border-black/[0.08] bg-white/86 p-5 shadow-[0_14px_30px_rgba(15,23,42,0.04)]">
-      <p className="text-xs uppercase tracking-[0.18em] text-text/38">{label}</p>
-      <p className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-text">{value}</p>
-      <p className="mt-2 text-sm leading-6 text-text/54">{hint}</p>
+    <div className="tracker-panel rounded-xl p-4">
+      <p className="text-xs font-semibold uppercase text-text/38">{label}</p>
+      <p className="mt-2 text-2xl font-semibold text-text">{value}</p>
+      <p className="mt-1 text-sm leading-5 text-text/54">{hint}</p>
     </div>
   );
 }
@@ -42,58 +42,58 @@ export function OverviewContent({ data, onCreateTask }: { data: WorkspaceData; o
   const priorityMax = Math.max(...priorityMix.map((item) => item.count), 1);
 
   return (
-    <div className="space-y-10">
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <div className="space-y-5">
+      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         <Metric label="Пульс проекта" value={pulse.label} hint={pulse.summary} />
         <Metric label="Открытые очереди" value={data.tasks.length - countByStatus(data.tasks, "DONE")} hint="Все незакрытые задачи текущего проекта." />
         <Metric label="Темп 7д" value={`${delivery.closed}/${delivery.created}`} hint="Закрытые и созданные задачи за последние 7 дней." />
         <Metric label="Готовность" value={`${getCompletion(data.tasks)}%`} hint="Доля задач в статусе Done." />
       </section>
 
-      <section className="grid gap-10 xl:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)]">
+      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)]">
         <div className="space-y-6">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-text/40">Командный центр</p>
-              <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-text">Что требует внимания</h2>
+              <p className="text-xs font-semibold uppercase text-text/40">Командный центр</p>
+              <h2 className="mt-2 text-xl font-semibold text-text">Что требует внимания</h2>
             </div>
-            <Button type="button" variant="primary" className="rounded-xl bg-[#111827] px-4 py-2.5 hover:bg-[#020617]" onClick={onCreateTask}>
+            <Button type="button" variant="primary" onClick={onCreateTask}>
               <PlusIcon className="mr-2" size={16} />
               Новая задача
             </Button>
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
-            <article className="rounded-[28px] border border-black/[0.08] bg-[#111827] p-5 text-white shadow-[0_18px_38px_rgba(15,23,42,0.16)]">
+            <article className="rounded-xl border border-black/[0.08] bg-[#1f2937] p-4 text-white shadow-sm">
               <div className="flex items-center gap-2">
                 <QueueIcon size={18} />
                 <p className="text-sm font-semibold">Triage</p>
               </div>
-              <p className="mt-5 text-4xl font-semibold tracking-[-0.06em]">{attention.unassigned}</p>
+              <p className="mt-4 text-3xl font-semibold">{attention.unassigned}</p>
               <p className="mt-2 text-sm leading-6 text-white/72">Без исполнителя. Хорошая точка входа для ежедневного разбора.</p>
             </article>
-            <article className="rounded-[28px] border border-black/[0.08] bg-white/82 p-5 shadow-[0_18px_38px_rgba(15,23,42,0.05)]">
+            <article className="tracker-panel rounded-xl p-4">
               <div className="flex items-center gap-2 text-[#20437a]">
                 <SparkIcon size={18} />
                 <p className="text-sm font-semibold text-text">Review queue</p>
               </div>
-              <p className="mt-5 text-4xl font-semibold tracking-[-0.06em] text-text">{attention.review}</p>
+              <p className="mt-4 text-3xl font-semibold text-text">{attention.review}</p>
               <p className="mt-2 text-sm leading-6 text-text/56">Задачи, которые ждут решения, обратной связи или приёмки.</p>
             </article>
-            <article className="rounded-[28px] border border-black/[0.08] bg-white/82 p-5 shadow-[0_18px_38px_rgba(15,23,42,0.05)]">
+            <article className="tracker-panel rounded-xl p-4">
               <div className="flex items-center gap-2 text-[#20437a]">
                 <ActivityIcon size={18} />
                 <p className="text-sm font-semibold text-text">Застрявшие</p>
               </div>
-              <p className="mt-5 text-4xl font-semibold tracking-[-0.06em] text-text">{attention.stale}</p>
+              <p className="mt-4 text-3xl font-semibold text-text">{attention.stale}</p>
               <p className="mt-2 text-sm leading-6 text-text/56">Задачи без заметного движения, которые могут тормозить delivery.</p>
             </article>
           </div>
 
-          <div className="overflow-hidden rounded-[30px] border border-black/[0.08] bg-white/82 shadow-[0_18px_38px_rgba(15,23,42,0.05)]">
+          <div className="tracker-panel overflow-hidden rounded-xl">
             <div className="flex items-center justify-between border-b border-black/[0.08] px-5 py-4">
               <div>
-                <p className="text-xs uppercase tracking-[0.16em] text-text/38">Фокусный backlog</p>
+                <p className="text-xs uppercase text-text/38">Фокусный backlog</p>
                 <h3 className="mt-1 text-lg font-semibold text-text">Критичные и review-задачи</h3>
               </div>
               <Badge tone={attention.urgent > 0 ? "danger" : "success"}>{attention.urgent} критичных</Badge>
@@ -106,9 +106,9 @@ export function OverviewContent({ data, onCreateTask }: { data: WorkspaceData; o
                 <Link
                   key={task.id}
                   href={`/tasks/${task.id}` as Route}
-                  className="grid gap-3 border-b border-black/[0.08] px-5 py-4 transition last:border-b-0 hover:bg-black/[0.025] md:grid-cols-[120px_minmax(0,1fr)_170px]"
+                className="grid gap-3 border-b border-black/[0.08] px-5 py-3 transition last:border-b-0 hover:bg-[#f8fafc] md:grid-cols-[120px_minmax(0,1fr)_170px]"
                 >
-                  <span className="font-mono text-xs font-bold uppercase tracking-[0.16em] text-text/40">{taskKey(task)}</span>
+                  <span className="font-mono text-xs font-bold uppercase text-text/40">{taskKey(task)}</span>
                   <span className="min-w-0">
                     <span className="block truncate font-semibold text-text">{task.title}</span>
                     <span className="mt-1 block text-sm text-text/50">{task.assignee?.name ?? "Без исполнителя"}</span>
@@ -124,7 +124,7 @@ export function OverviewContent({ data, onCreateTask }: { data: WorkspaceData; o
         </div>
 
         <aside className="space-y-5">
-          <section className="rounded-[30px] border border-black/[0.08] bg-white/82 p-5 shadow-[0_18px_38px_rgba(15,23,42,0.05)]">
+          <section className="tracker-panel rounded-xl p-4">
             <div className="flex items-center gap-2">
               <CheckCircleIcon size={18} className="text-[#20437a]" />
               <p className="text-sm font-semibold text-text">Темп изменений</p>
@@ -148,7 +148,7 @@ export function OverviewContent({ data, onCreateTask }: { data: WorkspaceData; o
             </div>
           </section>
 
-          <section className="rounded-[30px] border border-black/[0.08] bg-white/82 p-5 shadow-[0_18px_38px_rgba(15,23,42,0.05)]">
+          <section className="tracker-panel rounded-xl p-4">
             <div className="flex items-center gap-2">
               <UserIcon size={18} className="text-[#20437a]" />
               <p className="text-sm font-semibold text-text">Нагрузка команды</p>
@@ -158,7 +158,7 @@ export function OverviewContent({ data, onCreateTask }: { data: WorkspaceData; o
                 <p className="text-sm leading-6 text-text/58">Добавьте участников или назначьте задачи, чтобы увидеть распределение нагрузки.</p>
               ) : (
                 workload.map(({ member, inFlight, total, urgent }) => (
-                  <div key={member.id} className="rounded-[22px] border border-black/[0.08] px-4 py-3">
+                  <div key={member.id} className="rounded-lg border border-black/[0.08] px-3 py-2.5">
                     <div className="flex items-center justify-between gap-3">
                       <div className="min-w-0">
                         <p className="truncate text-sm font-semibold text-text">{member.name}</p>
@@ -174,7 +174,7 @@ export function OverviewContent({ data, onCreateTask }: { data: WorkspaceData; o
             </div>
           </section>
 
-          <section className="rounded-[30px] border border-black/[0.08] bg-white/82 p-5 shadow-[0_18px_38px_rgba(15,23,42,0.05)]">
+          <section className="tracker-panel rounded-xl p-4">
             <p className="text-sm font-semibold text-text">Приоритеты</p>
             <div className="mt-4 space-y-4">
               {priorityMix.map((item) => (
@@ -191,7 +191,7 @@ export function OverviewContent({ data, onCreateTask }: { data: WorkspaceData; o
             </div>
           </section>
 
-          <section className="overflow-hidden rounded-[30px] border border-black/[0.08] bg-white/82 shadow-[0_18px_38px_rgba(15,23,42,0.05)]">
+          <section className="tracker-panel overflow-hidden rounded-xl">
             <div className="border-b border-black/[0.08] px-5 py-4">
               <p className="text-sm font-semibold text-text">Последние обновления</p>
             </div>

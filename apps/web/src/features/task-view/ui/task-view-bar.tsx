@@ -74,20 +74,20 @@ export function TaskViewBar({ userId }: { userId: string }) {
     currentFilters.assigneeId === "ALL";
 
   return (
-    <section className="rounded-[28px] border border-black/[0.08] bg-white/78 p-4 shadow-[0_16px_32px_rgba(15,23,42,0.05)] backdrop-blur-sm">
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+    <section className="tracker-panel rounded-xl p-3">
+      <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
         <div className="min-w-0">
-          <p className="text-xs uppercase tracking-[0.18em] text-text/38">Представления</p>
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="mr-1 text-xs font-semibold uppercase text-text/42">Views</p>
             {presets.map((preset) => (
               <button
                 key={preset.id}
                 type="button"
                 onClick={() => applyTaskView(preset.filters)}
                 className={clsx(
-                  "rounded-2xl border px-4 py-2 text-sm font-semibold transition",
+                  "rounded-lg border px-3 py-1.5 text-sm font-semibold transition",
                   activePresetId === preset.id
-                    ? "border-[#111827] bg-[#111827] text-white shadow-[0_10px_22px_rgba(15,23,42,0.15)]"
+                    ? "border-[#1f2937] bg-[#1f2937] text-white shadow-sm"
                     : "border-black/[0.08] bg-white/80 text-text/68 hover:border-black/[0.16] hover:text-text",
                 )}
               >
@@ -96,12 +96,12 @@ export function TaskViewBar({ userId }: { userId: string }) {
             ))}
 
             {savedTaskViews.map((view) => (
-              <div key={view.id} className="group inline-flex items-center rounded-2xl border border-black/[0.08] bg-[#f3f5f7] pr-1">
+              <div key={view.id} className="group inline-flex items-center rounded-lg border border-black/[0.08] bg-[#f3f5f7] pr-1">
                 <button
                   type="button"
                   onClick={() => applyTaskView(view)}
                   className={clsx(
-                    "rounded-2xl px-4 py-2 text-sm font-semibold transition",
+                    "rounded-lg px-3 py-1.5 text-sm font-semibold transition",
                     activeSavedViewId === view.id ? "bg-[#dce7ff] text-[#20437a]" : "text-text/68 hover:text-text",
                   )}
                 >
@@ -111,7 +111,7 @@ export function TaskViewBar({ userId }: { userId: string }) {
                   type="button"
                   aria-label={`Удалить view ${view.name}`}
                   onClick={() => deleteTaskView(view.id)}
-                  className="rounded-xl px-2 py-1.5 text-xs font-bold text-text/34 transition hover:bg-black/[0.06] hover:text-text"
+                  className="rounded-md px-2 py-1 text-xs font-bold text-text/34 transition hover:bg-black/[0.06] hover:text-text"
                 >
                   ×
                 </button>
@@ -120,7 +120,7 @@ export function TaskViewBar({ userId }: { userId: string }) {
           </div>
         </div>
 
-        <div className="min-w-[280px] max-w-full rounded-[22px] border border-black/[0.08] bg-[#f4f6f8] p-3">
+        <div className="max-w-full rounded-lg border border-black/[0.08] bg-[#f8fafc] p-2 xl:min-w-[360px]">
           {isComposing ? (
             <form
               className="flex flex-col gap-2 sm:flex-row"
@@ -158,7 +158,7 @@ export function TaskViewBar({ userId }: { userId: string }) {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm font-semibold text-text">Текущее представление</p>
-                <p className="mt-1 text-sm text-text/52">
+                <p className="mt-0.5 text-xs text-text/52">
                   {activeSavedViewId
                     ? "Вы работаете в сохранённой кастомной выборке."
                     : activePresetId
@@ -167,7 +167,7 @@ export function TaskViewBar({ userId }: { userId: string }) {
                 </p>
               </div>
               <Button type="button" variant="secondary" disabled={customDisabled} onClick={() => setIsComposing(true)}>
-                Сохранить текущее представление
+                Сохранить view
               </Button>
             </div>
           )}

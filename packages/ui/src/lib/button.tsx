@@ -11,12 +11,12 @@ export function Button({ children, className, variant = "secondary", ...props }:
   return (
     <button
       className={clsx(
-        "inline-flex items-center justify-center rounded-2xl px-4 py-2.5 text-sm font-semibold transition duration-150 focus:outline-none focus:ring-2 focus:ring-accent/20",
+        "inline-flex items-center justify-center rounded-lg px-3.5 py-2 text-sm font-semibold transition duration-150 focus:outline-none focus:ring-2 focus:ring-accent/20",
         "disabled:cursor-not-allowed disabled:opacity-50",
         {
-          "bg-[#111827] text-white shadow-[0_12px_24px_rgba(15,23,42,0.14)] hover:bg-[#020617]": variant === "primary",
-          "border border-black/[0.08] bg-white text-text shadow-[0_8px_18px_rgba(15,23,42,0.06)] hover:bg-[#f8fafc]": variant === "secondary",
-          "bg-transparent text-text hover:bg-black/[0.035]": variant === "ghost",
+          "bg-[#1f2937] text-white shadow-sm hover:bg-[#111827]": variant === "primary",
+          "border border-black/[0.1] bg-white text-text shadow-sm hover:bg-[#f8fafc]": variant === "secondary",
+          "bg-transparent text-text hover:bg-black/[0.04]": variant === "ghost",
           "bg-rose-600 text-white hover:bg-rose-700": variant === "danger",
         },
         className,

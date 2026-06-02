@@ -31,32 +31,32 @@ export function AnalyticsContent({ data }: { data: WorkspaceData }) {
   return (
     <div className="space-y-5">
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-[30px] border border-black/[0.08] bg-[#111827] px-6 py-6 text-white shadow-[0_18px_38px_rgba(15,23,42,0.16)]">
-          <p className="text-xs uppercase tracking-[0.18em] text-white/46">Пульс проекта</p>
-          <p className="mt-2 text-5xl font-semibold tracking-[-0.06em]">{pulse.score}</p>
+        <div className="rounded-xl border border-black/[0.08] bg-[#111827] px-6 py-6 text-white shadow-sm">
+          <p className="text-xs uppercase text-white/46">Пульс проекта</p>
+          <p className="mt-2 text-5xl font-semibold tracking-normal">{pulse.score}</p>
           <p className="mt-3 text-sm leading-6 text-white/72">{pulse.summary}</p>
         </div>
-        <div className="rounded-[30px] border border-black/[0.08] bg-white/82 p-6 shadow-[0_18px_38px_rgba(15,23,42,0.05)]">
-          <p className="text-xs uppercase tracking-[0.18em] text-text/40">Готовность</p>
-          <p className="mt-2 text-5xl font-semibold tracking-[-0.06em] text-text">{completion}%</p>
+        <div className="rounded-xl border border-black/[0.08] bg-white/82 p-6 shadow-sm">
+          <p className="text-xs uppercase text-text/40">Готовность</p>
+          <p className="mt-2 text-5xl font-semibold tracking-normal text-text">{completion}%</p>
           <p className="mt-3 text-sm leading-6 text-text/56">Доля задач в статусе Done внутри текущего проекта.</p>
         </div>
-        <div className="rounded-[30px] border border-black/[0.08] bg-white/82 p-6 shadow-[0_18px_38px_rgba(15,23,42,0.05)]">
-          <p className="text-xs uppercase tracking-[0.18em] text-text/40">Темп 7д</p>
-          <p className="mt-2 text-5xl font-semibold tracking-[-0.06em] text-text">{delivery.closed}</p>
+        <div className="rounded-xl border border-black/[0.08] bg-white/82 p-6 shadow-sm">
+          <p className="text-xs uppercase text-text/40">Темп 7д</p>
+          <p className="mt-2 text-5xl font-semibold tracking-normal text-text">{delivery.closed}</p>
           <p className="mt-3 text-sm leading-6 text-text/56">Закрытых задач за неделю при {delivery.created} новых элементах.</p>
         </div>
-        <div className="rounded-[30px] border border-black/[0.08] bg-white/82 p-6 shadow-[0_18px_38px_rgba(15,23,42,0.05)]">
-          <p className="text-xs uppercase tracking-[0.18em] text-text/40">Риски</p>
-          <p className="mt-2 text-5xl font-semibold tracking-[-0.06em] text-text">{attention.stale + attention.unassigned}</p>
+        <div className="rounded-xl border border-black/[0.08] bg-white/82 p-6 shadow-sm">
+          <p className="text-xs uppercase text-text/40">Риски</p>
+          <p className="mt-2 text-5xl font-semibold tracking-normal text-text">{attention.stale + attention.unassigned}</p>
           <p className="mt-3 text-sm leading-6 text-text/56">Застрявшие и неразобранные задачи, требующие внимания команды.</p>
         </div>
       </section>
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1.1fr)_360px]">
-        <section className="rounded-[30px] border border-black/[0.08] bg-white/82 p-6 shadow-[0_18px_38px_rgba(15,23,42,0.05)]">
-          <p className="text-xs uppercase tracking-[0.18em] text-text/40">Workflow health</p>
-          <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-text">Распределение по статусам</h2>
+        <section className="rounded-xl border border-black/[0.08] bg-white/82 p-6 shadow-sm">
+          <p className="text-xs uppercase text-text/40">Workflow health</p>
+          <h2 className="mt-2 text-2xl font-semibold tracking-normal text-text">Распределение по статусам</h2>
           <div className="mt-6 space-y-5">
             {statusBreakdown.map((item) => (
               <div key={item.status}>
@@ -73,29 +73,29 @@ export function AnalyticsContent({ data }: { data: WorkspaceData }) {
         </section>
 
         <aside className="space-y-5">
-          <section className="rounded-[30px] border border-black/[0.08] bg-white/82 p-6 shadow-[0_18px_38px_rgba(15,23,42,0.05)]">
+          <section className="rounded-xl border border-black/[0.08] bg-white/82 p-6 shadow-sm">
             <p className="text-lg font-semibold text-text">Очереди</p>
             <div className="mt-4 space-y-3">
-              <div className="flex items-center justify-between gap-3 rounded-[22px] bg-[#f4f6f8] px-4 py-3">
+              <div className="flex items-center justify-between gap-3 rounded-lg bg-[#f4f6f8] px-4 py-3">
                 <span className="text-sm text-text/56">В работе</span>
                 <span className="text-sm font-bold text-text">{countByStatus(data.tasks, "IN_PROGRESS")}</span>
               </div>
-              <div className="flex items-center justify-between gap-3 rounded-[22px] bg-[#f4f6f8] px-4 py-3">
+              <div className="flex items-center justify-between gap-3 rounded-lg bg-[#f4f6f8] px-4 py-3">
                 <span className="text-sm text-text/56">На ревью</span>
                 <span className="text-sm font-bold text-text">{attention.review}</span>
               </div>
-              <div className="flex items-center justify-between gap-3 rounded-[22px] bg-[#f4f6f8] px-4 py-3">
+              <div className="flex items-center justify-between gap-3 rounded-lg bg-[#f4f6f8] px-4 py-3">
                 <span className="text-sm text-text/56">Без исполнителя</span>
                 <span className="text-sm font-bold text-text">{attention.unassigned}</span>
               </div>
-              <div className="flex items-center justify-between gap-3 rounded-[22px] bg-[#f4f6f8] px-4 py-3">
+              <div className="flex items-center justify-between gap-3 rounded-lg bg-[#f4f6f8] px-4 py-3">
                 <span className="text-sm text-text/56">Застрявшие</span>
                 <span className="text-sm font-bold text-text">{attention.stale}</span>
               </div>
             </div>
           </section>
 
-          <section className="rounded-[30px] border border-black/[0.08] bg-white/82 p-6 shadow-[0_18px_38px_rgba(15,23,42,0.05)]">
+          <section className="rounded-xl border border-black/[0.08] bg-white/82 p-6 shadow-sm">
             <p className="text-lg font-semibold text-text">Приоритеты</p>
             <div className="mt-4 space-y-4">
               {priorityMix.map((item) => (
@@ -115,9 +115,9 @@ export function AnalyticsContent({ data }: { data: WorkspaceData }) {
       </div>
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.8fr)]">
-        <section className="rounded-[30px] border border-black/[0.08] bg-white/82 p-6 shadow-[0_18px_38px_rgba(15,23,42,0.05)]">
-          <p className="text-xs uppercase tracking-[0.18em] text-text/40">Темп изменений</p>
-          <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-text">Создание, движение и закрытие</h2>
+        <section className="rounded-xl border border-black/[0.08] bg-white/82 p-6 shadow-sm">
+          <p className="text-xs uppercase text-text/40">Темп изменений</p>
+          <h2 className="mt-2 text-2xl font-semibold tracking-normal text-text">Создание, движение и закрытие</h2>
           <div className="mt-8 grid grid-cols-7 gap-3">
             {timeline.map((point) => (
               <div key={point.label} className="text-center">
@@ -137,9 +137,9 @@ export function AnalyticsContent({ data }: { data: WorkspaceData }) {
           </div>
         </section>
 
-        <section className="rounded-[30px] border border-black/[0.08] bg-white/82 p-6 shadow-[0_18px_38px_rgba(15,23,42,0.05)]">
-          <p className="text-xs uppercase tracking-[0.18em] text-text/40">Нагрузка команды</p>
-          <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-text">Нагрузка по исполнителям</h2>
+        <section className="rounded-xl border border-black/[0.08] bg-white/82 p-6 shadow-sm">
+          <p className="text-xs uppercase text-text/40">Нагрузка команды</p>
+          <h2 className="mt-2 text-2xl font-semibold tracking-normal text-text">Нагрузка по исполнителям</h2>
           <div className="mt-6 space-y-4">
             {assigneeGroups.length === 0 ? (
               <p className="text-sm leading-6 text-text/52">Добавьте участников в организацию, чтобы видеть распределение задач.</p>

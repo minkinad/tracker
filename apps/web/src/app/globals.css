@@ -5,13 +5,13 @@
 @tailwind utilities;
 
 :root {
-  --surface: #edf1f5;
+  --surface: #f6f7f9;
   --card: #ffffff;
-  --border: #d5dde7;
-  --muted: #f4f7fa;
-  --text: #111827;
-  --accent: #3156d3;
-  --accent-soft: rgba(49, 86, 211, 0.14);
+  --border: #d9dee7;
+  --muted: #eef1f5;
+  --text: #0f172a;
+  --accent: #3f76ff;
+  --accent-soft: rgba(63, 118, 255, 0.12);
   --success: #0f766e;
   --warning: #c27a1a;
   --danger: #c2414b;
@@ -44,28 +44,11 @@ html {
 body {
   min-height: 100vh;
   color: var(--text);
-  background:
-    radial-gradient(circle at 12% 14%, rgba(49, 86, 211, 0.11), transparent 22%),
-    radial-gradient(circle at 84% 10%, rgba(17, 24, 39, 0.06), transparent 18%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(237, 241, 245, 0.62)),
-    var(--surface);
+  background: var(--surface);
   font-family: "Manrope", "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
-}
-
-body::before {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  content: "";
-  background-image:
-    linear-gradient(rgba(17, 24, 39, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(17, 24, 39, 0.025) 1px, transparent 1px);
-  background-size: 44px 44px;
-  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.62), transparent 82%);
 }
 
 * {
@@ -130,6 +113,19 @@ select option {
 
 main {
   animation: tracker-rise 420ms ease-out both;
+}
+
+@layer components {
+  .tracker-panel {
+    border: 1px solid rgb(15 23 42 / 0.08);
+    background: rgb(255 255 255 / 0.92);
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.05);
+  }
+
+  .tracker-subtle-panel {
+    border: 1px solid rgb(15 23 42 / 0.08);
+    background: #f9fafb;
+  }
 }
 
 ::-webkit-scrollbar {

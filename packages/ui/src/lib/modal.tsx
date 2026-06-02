@@ -10,7 +10,7 @@ export function Modal({ children, title, subtitle, onClose }: ModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-4" onClick={onClose}>
       <div
-        className="w-full max-w-4xl rounded-3xl border border-border bg-surface p-6 shadow-soft"
+        className="w-full max-w-4xl rounded-xl border border-border bg-surface p-6 shadow-soft"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="mb-6 flex items-start justify-between gap-4">
@@ -23,7 +23,7 @@ export function Modal({ children, title, subtitle, onClose }: ModalProps) {
             className="rounded-full border border-border px-3 py-1 text-sm transition hover:bg-muted"
             onClick={onClose}
           >
-            Close
+            Закрыть
           </button>
         </div>
         {children}

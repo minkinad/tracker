@@ -39,8 +39,8 @@ const TaskCard = memo(function TaskCard({ task, onOpen }: { task: TaskDto; onOpe
       animate={{ opacity: isDragging ? 0.58 : 1, scale: isDragging ? 1.015 : 1 }}
       transition={{ duration: 0.16 }}
       className={clsx(
-        "group rounded-[24px] border border-black/[0.08] bg-white/86 p-4 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition",
-        isDragging ? "z-20 cursor-grabbing bg-white/70 ring-2 ring-accent/30" : "hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_14px_28px_rgba(15,23,42,0.08)]",
+        "group rounded-lg border border-black/[0.08] bg-white p-3 text-left shadow-sm transition",
+        isDragging ? "z-20 cursor-grabbing bg-white/70 ring-2 ring-accent/30" : "hover:border-black/[0.14] hover:bg-white",
       )}
     >
       <button
@@ -56,19 +56,19 @@ const TaskCard = memo(function TaskCard({ task, onOpen }: { task: TaskDto; onOpe
       >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="font-mono text-xs font-semibold uppercase tracking-[0.16em] text-text/38">
+            <p className="font-mono text-xs font-semibold uppercase text-text/38">
               {task.id.slice(-8).toUpperCase()}
             </p>
-            <h3 className="mt-2 line-clamp-2 text-base font-semibold leading-6 text-text">{task.title}</h3>
+            <h3 className="mt-1.5 line-clamp-2 text-sm font-semibold leading-5 text-text">{task.title}</h3>
           </div>
           <Badge tone={priorityTone[task.priority]}>{priorityLabels[task.priority]}</Badge>
         </div>
 
-        <p className="mt-3 line-clamp-3 text-sm leading-6 text-text/56">{task.description || "Описание не заполнено"}</p>
+        <p className="mt-2 line-clamp-2 text-sm leading-5 text-text/56">{task.description || "Описание не заполнено"}</p>
 
-        <div className="mt-5 flex items-center justify-between gap-3">
+        <div className="mt-4 flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-2">
-            <div className="grid h-8 w-8 place-items-center rounded-lg bg-[#111827] text-[11px] font-bold text-white">
+            <div className="grid h-7 w-7 place-items-center rounded-md bg-[#1f2937] text-[10px] font-bold text-white">
               {getInitials(task.assignee?.name ?? "UN")}
             </div>
             <span className="truncate text-xs font-medium text-text/60">{task.assignee?.name ?? "Не назначен"}</span>
@@ -79,7 +79,7 @@ const TaskCard = memo(function TaskCard({ task, onOpen }: { task: TaskDto; onOpe
           </span>
         </div>
 
-        <div className="mt-4 flex items-center justify-between text-xs text-text/44">
+        <div className="mt-3 flex items-center justify-between text-xs text-text/44">
           <span>{formatRelativeDate(task.updatedAt)}</span>
           <span className="inline-flex items-center gap-1.5">
             <UserIcon size={14} />
@@ -108,14 +108,14 @@ function BoardColumn({
     <section
       ref={setNodeRef}
       className={clsx(
-        "min-h-[320px] rounded-[28px] border border-black/[0.08] bg-white/82 p-4 shadow-[0_18px_38px_rgba(15,23,42,0.05)] transition xl:min-h-[520px]",
-        isOver ? "bg-[#eef4ff] ring-2 ring-[#3f7cf4]/20" : "bg-white/82",
+        "min-h-[320px] rounded-xl border border-black/[0.08] bg-[#f8fafc] p-3 transition xl:min-h-[520px]",
+        isOver ? "bg-[#eef4ff] ring-2 ring-[#3f76ff]/20" : "bg-[#f8fafc]",
       )}
     >
-      <header className="mb-4 flex items-start justify-between gap-3 border-b border-black/[0.08] pb-4">
+      <header className="mb-3 flex items-start justify-between gap-3 border-b border-black/[0.08] pb-3">
         <div>
           <Badge tone={statusTone[status]}>{statusLabels[status]}</Badge>
-          <p className="mt-3 text-sm leading-6 text-text/52">
+          <p className="mt-2 text-xs leading-5 text-text/52">
             {status === "TODO" ? "Новые и ожидающие triage" : null}
             {status === "IN_PROGRESS" ? "Активная работа команды" : null}
             {status === "REVIEW" ? "Проверка и приёмка результата" : null}
@@ -127,7 +127,7 @@ function BoardColumn({
 
       <div className="space-y-3">
         {tasks.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-black/[0.08] px-4 py-10 text-center text-sm leading-6 text-text/44">
+          <div className="rounded-lg border border-dashed border-black/[0.1] px-4 py-10 text-center text-sm leading-6 text-text/44">
             Перетащите задачу сюда, чтобы сменить статус.
           </div>
         ) : (
@@ -177,7 +177,7 @@ export function KanbanBoard({ tasks, onOpenTask }: { tasks: TaskDto[]; onOpenTas
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 xl:grid-cols-4">
         {statusOrder.map((status) => (
           <BoardColumn
             key={status}
