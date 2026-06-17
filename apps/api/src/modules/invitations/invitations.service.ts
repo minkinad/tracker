@@ -29,10 +29,10 @@ export class InvitationsService {
 		invitedById: string,
 		dto: CreateInvitationBodyDto,
 	) {
-		await this.organizationsService.requireRole(
+		await this.organizationsService.requirePermission(
 			invitedById,
 			organizationId,
-			["OWNER", "ADMIN"],
+			"member:invite",
 		);
 
 		const email = dto.email.trim().toLowerCase();

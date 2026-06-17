@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { OrganizationsModule } from "../organizations/organizations.module";
 import { RealtimeModule } from "../realtime/realtime.module";
 import { ActivityRepository } from "./activity.repository";
 import { CommentsRepository } from "./comments.repository";
@@ -15,7 +16,7 @@ import { TasksRepository } from "./tasks.repository";
 import { TasksService } from "./tasks.service";
 
 @Module({
-  imports: [RealtimeModule],
+  imports: [RealtimeModule, OrganizationsModule],
   controllers: [TasksController],
   providers: [
     TasksService,

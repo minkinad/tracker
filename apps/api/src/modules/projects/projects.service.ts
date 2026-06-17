@@ -32,7 +32,11 @@ export class ProjectsService {
   }
 
   async create(userId: string, dto: CreateProjectDto): Promise<ProjectDto> {
-    await this.organizationsService.requireRole(userId, dto.organizationId, ["OWNER", "ADMIN"]);
+    await this.organizationsService.requirePermission(
+      userId,
+      dto.organizationId,
+      "project:create",
+    );
 
     const project = await this.projectsRepository.create(dto);
 

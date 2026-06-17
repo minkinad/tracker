@@ -1,5 +1,9 @@
 import { ForbiddenException, Injectable } from "@nestjs/common";
 import type { OrganizationDto, OrganizationRole } from "@tracker/types";
+import {
+  roleHasPermission,
+  type OrganizationPermission,
+} from "../../common/auth/organization-permissions";
 import { OrganizationsRepository } from "./organizations.repository";
 
 @Injectable()
@@ -28,6 +32,23 @@ export class OrganizationsService {
     );
 
     if (!membership || !allowedRoles.includes(membership.role)) {
+      throw new ForbiddenException("Insufficient organization permissions");
+    }
+
+    return membership;
+  }
+
+  async requirePermission(
+    userId: string,
+    organizationId: string,
+    permission: OrganizationPermission,
+  ) {
+    const membership = await this.organizationsRepository.findMembership(
+      userId,
+      organizationId,
+    );
+
+    if (!membership || !roleHasPermission(membership.role, permission)) {
       throw new ForbiddenException("Insufficient organization permissions");
     }
 

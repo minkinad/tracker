@@ -89,6 +89,16 @@ export class TasksRepository {
     });
   }
 
+  findProjectScope(projectId: string) {
+    return this.prisma.project.findUnique({
+      where: { id: projectId },
+      select: {
+        id: true,
+        organizationId: true,
+      },
+    });
+  }
+
   userCanAccessProject(projectId: string, userId: string) {
     return this.prisma.project.findFirst({
       where: {

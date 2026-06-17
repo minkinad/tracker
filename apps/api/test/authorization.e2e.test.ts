@@ -76,4 +76,39 @@ describe("organization authorization", () => {
 
     assert.equal(adminResponse.status, 201);
   });
+
+  it("rejects member invitation but allows admin invitation", async () => {
+    const context = await createTestApp();
+    appsToClose.add(context);
+
+    const request = supertest(context.app.getHttpServer());
+
+    const engineerLogin = await request.post("/api/auth/login").send({
+      email: "engineer@tracker.local",
+      password: "changeme123",
+    });
+
+    assert.equal(engineerLogin.status, 201);
+
+    const engineerToken = engineerLogin.body.tokens.accessToken as string;
+
+    const memberResponse = await request.post(`/api/organizations/${testIds.organizationId}/invitations`).set("Authorization", `Bearer ${engineerToken}`).send({
+      email: "member-blocked@example.com",
+      role: "MEMBER",
+    });
+
+    assert.equal(memberResponse.status, 403);
+
+    const membership = context.store.memberships.find((item) => item.userId === testIds.engineerId,);
+
+    assert.ok(membership);
+    membership.role = "ADMIN";
+
+    const adminResponse = await request.post(`/api/organizations/${testIds.organizationId}/invitations`).set("Authorization", `Bearer ${engineerToken}`).send({
+      email: "member-allowed@example.com",
+      role: "MEMBER",
+    });
+
+    assert.equal(adminResponse.status, 201);
+  });
 });

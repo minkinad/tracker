@@ -1,5 +1,6 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import type { CreateTaskDto, TaskActivityDto, TaskDetailsDto, TaskFiltersDto, TaskListResponseDto, UpdateTaskDto } from "@tracker/types";
+import { OrganizationsService } from "../organizations/organizations.service";
 import { RedisService } from "../../common/redis/redis.service";
 import { ActivityRepository } from "./activity.repository";
 import { CommentsRepository } from "./comments.repository";
@@ -15,6 +16,7 @@ export class TasksService {
     private readonly activityRepository: ActivityRepository,
     private readonly redisService: RedisService,
     private readonly taskEventsService: TaskEventsService,
+    private readonly organizationsService: OrganizationsService,
   ) {}
 
   async list(userId: string, filters: TaskFiltersDto): Promise<TaskListResponseDto> {
@@ -42,11 +44,17 @@ export class TasksService {
   }
 
   async create(projectId: string, userId: string, dto: CreateTaskDto) {
-    const project = await this.tasksRepository.findProjectWithAccess(projectId, userId);
+    const project = await this.tasksRepository.findProjectScope(projectId);
 
     if (!project) {
       throw new ForbiddenException("Access denied to project");
     }
+
+    await this.organizationsService.requirePermission(
+      userId,
+      project.organizationId,
+      "task:create",
+    );
 
     await this.ensureAssigneeCanAccessProject(projectId, dto.assigneeId);
 
@@ -80,6 +88,18 @@ export class TasksService {
       throw new NotFoundException("Task not found");
     }
 
+    const project = await this.tasksRepository.findProjectScope(existing.projectId);
+
+    if (!project) {
+      throw new NotFoundException("Task not found");
+    }
+
+    await this.organizationsService.requirePermission(
+      userId,
+      project.organizationId,
+      "task:update",
+    );
+
     if (dto.assigneeId !== undefined) {
       await this.ensureAssigneeCanAccessProject(existing.projectId, dto.assigneeId);
     }
@@ -105,6 +125,18 @@ export class TasksService {
       throw new NotFoundException("Task not found");
     }
 
+    const project = await this.tasksRepository.findProjectScope(existing.projectId);
+
+    if (!project) {
+      throw new NotFoundException("Task not found");
+    }
+
+    await this.organizationsService.requirePermission(
+      userId,
+      project.organizationId,
+      "task:comment",
+    );
+
     const comment = await this.commentsRepository.create(taskId, userId, body);
 
     await this.taskEventsService.publish({
@@ -124,6 +156,18 @@ export class TasksService {
     if (!existing) {
       throw new NotFoundException("Task not found");
     }
+
+    const project = await this.tasksRepository.findProjectScope(existing.projectId);
+
+    if (!project) {
+      throw new NotFoundException("Task not found");
+    }
+
+    await this.organizationsService.requirePermission(
+      userId,
+      project.organizationId,
+      "task:activity:read",
+    );
 
     const activity = await this.activityRepository.list(taskId);
     return activity.map(mapActivity);
