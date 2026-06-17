@@ -9,6 +9,7 @@ import { LoggingMiddleware } from "./common/logging/logging.middleware";
 import { PrismaModule } from "./common/prisma/prisma.module";
 import { RedisModule } from "./common/redis/redis.module";
 import { RealtimeModule } from "./modules/realtime/realtime.module";
+import { InvitationsModule } from "./modules/invitations/invitations.module";
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { RealtimeModule } from "./modules/realtime/realtime.module";
     AuthModule,
     UsersModule,
     OrganizationsModule,
+    InvitationsModule,
     ProjectsModule,
     TasksModule,
     RealtimeModule,

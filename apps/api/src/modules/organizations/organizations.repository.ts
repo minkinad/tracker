@@ -18,4 +18,15 @@ export class OrganizationsRepository {
       },
     });
   }
+
+  findMembership(userId: string, organizationId: string) {
+    return this.prisma.organizationMembership.findUnique({
+      where: {
+        organizationId_userId: {
+          organizationId,
+          userId,
+        },
+      },
+    });
+  }
 }

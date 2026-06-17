@@ -1,10 +1,14 @@
 import { ForbiddenException, Injectable } from "@nestjs/common";
 import type { CreateProjectDto, ProjectDto } from "@tracker/types";
+import { OrganizationsService } from "../organizations/organizations.service";
 import { ProjectsRepository } from "./projects.repository";
 
 @Injectable()
 export class ProjectsService {
-  constructor(private readonly projectsRepository: ProjectsRepository) {}
+  constructor(
+    private readonly projectsRepository: ProjectsRepository,
+    private readonly organizationsService: OrganizationsService,
+  ) {}
 
   async list(userId: string, organizationId: string): Promise<ProjectDto[]> {
     const hasAccess = await this.projectsRepository.canAccessOrganization(userId, organizationId);
@@ -28,11 +32,7 @@ export class ProjectsService {
   }
 
   async create(userId: string, dto: CreateProjectDto): Promise<ProjectDto> {
-    const hasAccess = await this.projectsRepository.canAccessOrganization(userId, dto.organizationId);
-
-    if (!hasAccess) {
-      throw new ForbiddenException("Access denied to organization projects");
-    }
+    await this.organizationsService.requireRole(userId, dto.organizationId, ["OWNER", "ADMIN"]);
 
     const project = await this.projectsRepository.create(dto);
 

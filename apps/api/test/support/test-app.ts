@@ -18,6 +18,9 @@ import { ActivityRepository } from "../../src/modules/tasks/activity.repository"
 import { CommentsRepository } from "../../src/modules/tasks/comments.repository";
 import { TasksRepository } from "../../src/modules/tasks/tasks.repository";
 import { UsersRepository } from "../../src/modules/users/users.repository";
+import { InvitationsRepository } from "../../src/modules/invitations/invitations.repository";
+import { OrganizationsRepository } from "../../src/modules/organizations/organizations.repository";
+import { ProjectsRepository } from "../../src/modules/projects/projects.repository";
 
 type UserRole = "ADMIN" | "USER";
 type OrganizationRole = "OWNER" | "ADMIN" | "MEMBER";
@@ -96,6 +99,19 @@ interface RefreshTokenRecord {
   revokedAt: Date | null;
 }
 
+interface InvitationRecord {
+  id: string;
+  organizationId: string;
+  email: string;
+  role: OrganizationRole;
+  tokenHash: string;
+  expiresAt: Date;
+  invitedById: string;
+  createdAt: Date;
+  acceptedAt: Date | null;
+  revokedAt: Date | null;
+}
+
 const STATUS_ORDER: Record<TaskStatus, number> = {
   TODO: 0,
   IN_PROGRESS: 1,
@@ -128,6 +144,7 @@ class InMemoryTrackerStore {
   readonly comments: CommentRecord[] = [];
   readonly activities: ActivityRecord[] = [];
   readonly refreshTokens: RefreshTokenRecord[] = [];
+  readonly invitations: InvitationRecord[] = [];
   private nextSequence = 1;
 
   constructor(passwordHash: string) {
@@ -348,6 +365,22 @@ function createUsersRepository(store: InMemoryTrackerStore): UsersRepository {
   } as UsersRepository;
 }
 
+function createOrganizationsRepository(
+  store: InMemoryTrackerStore,
+): OrganizationsRepository {
+  return {
+    findMembership(userId: string, organizationId: string) {
+      return Promise.resolve(
+        store.memberships.find(
+          (item) =>
+            item.userId === userId &&
+            item.organizationId === organizationId,
+        ) ?? null,
+      );
+    },
+  } as OrganizationsRepository
+}
+
 function createAuthRepository(store: InMemoryTrackerStore): AuthRepository {
   return {
     async createRefreshToken(userId: string, tokenHash: string, expiresAt: Date) {
@@ -523,6 +556,128 @@ function createTasksRepository(store: InMemoryTrackerStore): TasksRepository {
   } as unknown as TasksRepository;
 }
 
+function createProjectsRepository(
+  store: InMemoryTrackerStore,
+): ProjectsRepository {
+  return {
+    async create(input) {
+      const now = new Date();
+
+      const project = {
+        id: store.nextId("project"),
+        organizationId: input.organizationId,
+        key: input.key,
+        name: input.name,
+        description: input.description ?? null,
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      store.projects.push(project);
+
+      return {
+        ...project,
+        _count: { tasks: 0 },
+      };
+    },
+  } as ProjectsRepository;
+}
+
+function createInvitationsRepository(
+  store: InMemoryTrackerStore,
+): InvitationsRepository {
+  return {
+    async upsertInvitation(input) {
+      const existing = store.invitations.find(
+        (item) =>
+          item.organizationId === input.organizationId &&
+          item.email === input.email,
+      );
+
+      if (existing) {
+        Object.assign(existing, input, {
+          acceptedAt: null,
+          revokedAt: null,
+        });
+        return existing;
+      }
+
+      const invitation: InvitationRecord = {
+        id: store.nextId("invitation"),
+        ...input,
+        createdAt: new Date(),
+        acceptedAt: null,
+        revokedAt: null,
+      };
+
+      store.invitations.push(invitation);
+      return invitation;
+    },
+
+    async findActiveByTokenHash(tokenHash: string) {
+      return store.invitations.find(
+        (item) =>
+          item.tokenHash === tokenHash &&
+          item.acceptedAt === null &&
+          item.revokedAt === null &&
+          item.expiresAt.getTime() > Date.now(),
+      ) ?? null;
+    },
+
+    async acceptInvitation(input) {
+      const invitation = store.invitations.find(
+        (item) =>
+          item.id === input.invitationId &&
+          item.acceptedAt === null &&
+          item.revokedAt === null &&
+          item.expiresAt.getTime() > Date.now(),
+      );
+
+      if (!invitation) {
+        return null;
+      }
+
+      invitation.acceptedAt = new Date();
+
+      let user = store.users.find(
+        (item) => item.email === input.email,
+      );
+
+      if (!user) {
+        user = {
+          id: store.nextId("user"),
+          email: input.email,
+          name: input.name,
+          passwordHash: input.passwordHash,
+          role: "USER",
+        };
+        store.users.push(user);
+      }
+
+      let membership = store.memberships.find(
+        (item) =>
+          item.organizationId === input.organizationId &&
+          item.userId === user.id,
+      );
+
+      if (membership) {
+        membership.role = input.role;
+      } else {
+        membership = {
+          id: store.nextId("membership"),
+          organizationId: input.organizationId,
+          userId: user.id,
+          role: input.role,
+          createdAt: new Date(),
+        };
+        store.memberships.push(membership);
+      }
+
+      return { user, membership };
+    },
+  } as InvitationsRepository
+}
+
 function createCommentsRepository(store: InMemoryTrackerStore): CommentsRepository {
   return {
     async create(taskId: string, authorId: string, body: string) {
@@ -638,10 +793,16 @@ export async function createTestApp(): Promise<TestAppContext> {
     .useValue(createAuthRepository(store))
     .overrideProvider(TasksRepository)
     .useValue(createTasksRepository(store))
+    .overrideProvider(OrganizationsRepository)
+    .useValue(createOrganizationsRepository(store))
+    .overrideProvider(ProjectsRepository)
+    .useValue(createProjectsRepository(store))
     .overrideProvider(CommentsRepository)
     .useValue(createCommentsRepository(store))
     .overrideProvider(ActivityRepository)
     .useValue(createActivityRepository(store))
+    .overrideProvider(InvitationsRepository)
+    .useValue(createInvitationsRepository(store))
     .compile();
 
   const app = moduleRef.createNestApplication();
