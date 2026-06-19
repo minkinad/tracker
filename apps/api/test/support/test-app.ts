@@ -487,6 +487,18 @@ function createTasksRepository(store: InMemoryTrackerStore): TasksRepository {
 
       return Promise.resolve(project);
     },
+    findProjectScope(projectId: string) {
+      const project = store.findProject(projectId);
+
+      if (!project) {
+        return Promise.resolve(null);
+      }
+
+      return Promise.resolve({
+        id: project.id,
+        organizationId: project.organizationId,
+      });
+    },
     userCanAccessProject(projectId: string, userId: string) {
       if (!store.hasProjectAccess(userId, projectId)) {
         return Promise.resolve(null);
