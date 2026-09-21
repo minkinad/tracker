@@ -1,4 +1,4 @@
-FROM node:22-alpine AS builder
+FROM node:25-alpine AS builder
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
@@ -21,7 +21,7 @@ RUN pnpm --filter @tracker/db prisma:generate
 RUN pnpm --filter @tracker/db build
 RUN pnpm --filter @tracker/api build
 
-FROM node:22-alpine AS runner
+FROM node:25-alpine AS runner
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
