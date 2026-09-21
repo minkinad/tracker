@@ -1,4 +1,4 @@
-FROM node:22-alpine AS builder
+FROM node:25-alpine AS builder
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
@@ -25,7 +25,7 @@ WORKDIR /app/apps/web
 
 RUN pnpm build
 
-FROM node:22-alpine AS runner
+FROM node:25-alpine AS runner
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
